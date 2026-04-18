@@ -1,4 +1,6 @@
 import numpy as np
+import torch
+from torchvision.transforms.functional import to_tensor
 from torch.utils.data import Subset
 
 def split_noniid(train_idcs, train_labels, alpha, n_clients):
@@ -34,5 +36,12 @@ class CustomSubset(Subset):
         
         if self.subset_transform:
             x = self.subset_transform(x)
+
+        # Ensure DataLoader always receives tensors even if transforms were skipped.
+        if not torch.is_tensor(x):
+            x = to_tensor(x)
       
         return x, y   
+
+    def __getitems__(self, indices):
+        return [self.__getitem__(idx) for idx in indices]
